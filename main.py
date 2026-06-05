@@ -4,6 +4,12 @@ import random
 
 pygame.init()
 
+# Окно
+WIDTH, HEIGHT = 1920, 1080
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
+pygame.display.set_caption("Alone")
+clock = pygame.time.Clock()
+
 # текстуры для игры
 try:
     player_img = pygame.image.load("images/player.png")
@@ -32,12 +38,11 @@ try:
     floor_img = pygame.transform.scale(floor_img, (64, 64))
 except:
     floor_img = None
-
-# Окно
-WIDTH, HEIGHT = 1920, 1080
-screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
-pygame.display.set_caption("Alone")
-clock = pygame.time.Clock()
+try:
+    menu_bg_img = pygame.image.load('images/menu_bg.png')
+    menu_bg_img = pygame.transform.scale(menu_bg_img, (WIDTH, HEIGHT))
+except:
+    menu_bg_img = None
 
 # Цвета
 BLACK = (0, 0, 0)
@@ -106,8 +111,14 @@ game_over = False
 in_shop = False
 
 # Шрифт
-font = pygame.font.Font(None, 36)
-big_font = pygame.font.Font(None, 72)
+try:
+    font = pygame.font.Font("font.ttf", 24)
+    big_font = pygame.font.Font("font.ttf", 48)
+    small_font = pygame.font.Font("font.ttf", 16)
+except:
+    font = pygame.font.Font(None, 36)
+    big_font = pygame.font.Font(None, 72)
+    small_font = pygame.font.Font(None, 24)
 
 # Язык
 lang = "ru"
@@ -266,8 +277,6 @@ while True:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if in_skins:
-                if event.key == pygame.K_ESCAPE:
-                    in_skins = False
                 if event.key == pygame.K_UP and skin_selected > 0:
                     skin_selected -= 1
                 if event.key == pygame.K_DOWN and skin_selected < len(skins) - 1:
@@ -293,7 +302,7 @@ while True:
                         apply_choice(item)
                 if event.key == pygame.K_SPACE:
                     in_shop = False
-            if event.key == pygame.K_SPACE and (in_menu or game_over):
+            if event.key == pygame.K_SPACE and (in_menu or game_over) and not in_skins and not in_shop:
                 # Полный сброс
                 player_x, player_y = WIDTH // 2, HEIGHT // 2
                 player_hp = 100
@@ -326,12 +335,22 @@ while True:
                 game_over = False
                 in_shop = False
             if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                sys.exit()
+                if in_skins:
+                    in_skins = False
+                    in_menu = True
+                elif in_shop:
+                    in_shop = False
+                elif in_menu:
+                    pygame.quit()
+                    sys.exit()
+                else:
+                    in_menu = True
+                    game_over = False
             if event.key == pygame.K_l and in_menu:
                 lang = "ru" if lang == "en" else "en"
             if event.key == pygame.K_4 and in_menu:
                 in_skins = True
+                in_menu = False
                 skin_selected = current_skin
             if choosing:
                 if event.key == pygame.K_1 and len(level_up_choices) >= 1:
@@ -343,21 +362,6 @@ while True:
                 if event.key == pygame.K_3 and len(level_up_choices) >= 3:
                     apply_choice(level_up_choices[2])
                     choosing = False
-
-    # Меню
-    if in_menu:
-        screen.fill(BLACK)
-        title = big_font.render(t("title"), True, WHITE)
-        start = font.render(t("start"), True, GRAY)
-        lang_text = font.render(t("lang_hint"), True, GRAY)
-        skins_btn = font.render("[4] SKINS", True, GRAY)
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
-        screen.blit(start, start.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20)))
-        screen.blit(lang_text, lang_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20)))
-        screen.blit(skins_btn, skins_btn.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 60)))
-        pygame.display.flip()
-        clock.tick(60)
-        continue
 
     # Экран скинов
     if in_skins:
@@ -376,6 +380,37 @@ while True:
 
         hint = font.render("UP/DOWN - choose | ENTER - select/buy | ESC - back", True, GRAY)
         screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT - 50)))
+
+        pygame.display.flip()
+        clock.tick(60)
+        continue
+
+    # Меню
+    if in_menu:
+        if menu_bg_img:
+            screen.blit(menu_bg_img, (0, 0))
+        else:
+            screen.fill(BLACK)
+
+        # Фон меню (тёмная рамка)
+        menu_bg = pygame.Rect(WIDTH // 2 - 250, HEIGHT // 2 - 150, 500, 300)
+        pygame.draw.rect(screen, (20, 20, 30, 200), menu_bg)
+        pygame.draw.rect(screen, (80, 80, 100), menu_bg, 3)
+
+        title = big_font.render(t("title"), True, YELLOW)
+        title_shadow = big_font.render(t("title"), True, (100, 80, 0))
+
+        # Тень заголовка
+        screen.blit(title_shadow, title_shadow.get_rect(center=(WIDTH // 2 + 3, HEIGHT // 2 - 67)))
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
+
+        start = font.render(t("start"), True, WHITE)
+        lang_text = small_font.render(t("lang_hint"), True, GRAY)
+        skins_btn = small_font.render("[4] SKINS", True, GRAY)
+
+        screen.blit(start, start.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20)))
+        screen.blit(lang_text, lang_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20)))
+        screen.blit(skins_btn, skins_btn.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 60)))
 
         pygame.display.flip()
         clock.tick(60)
@@ -562,6 +597,11 @@ while True:
     else:
         screen.fill(GRAY)
 
+    # Панель интерфейса
+    panel = pygame.Rect(5, 5, 250, 90)
+    pygame.draw.rect(screen, (0, 0, 0, 180), panel)
+    pygame.draw.rect(screen, (80, 80, 100), panel, 2)
+
     for c in coins:
         if coin_img:
             screen.blit(coin_img, (c[0] - 7, c[1] - 7))
@@ -619,14 +659,13 @@ while True:
         pygame.draw.rect(screen, WHITE, (bx, by, bar_w, bar_h), 1)
 
     # Интерфейс
-    hp_text = font.render(f"{t('hp')}: {int(player_hp)}/{player_max_hp}", True, WHITE)
-    lvl_text = font.render(f"{t('lvl')}: {level} | XP: {xp}/{xp_to_level}", True, WHITE)
+    lvl_text = font.render(f"{t('lvl')}: {level}", True, WHITE)
     coins_text = font.render(f"{t('coins')}: {total_coins}", True, YELLOW)
-    wave_text = font.render(f"{t('wave')}: {wave} | {t('boss_in')}: {enemies_to_boss - total_kills}", True, ORANGE)
-    screen.blit(hp_text, (10, 10))
-    screen.blit(lvl_text, (10, 40))
-    screen.blit(coins_text, (10, 70))
-    screen.blit(wave_text, (10, 100))
+    wave_text = font.render(f"{t('wave')}: {wave}", True, ORANGE)
+    boss_text = font.render(f"{t('boss_in')}: {enemies_to_boss - total_kills}", True, ORANGE)
+    screen.blit(lvl_text, (15, 15))
+    screen.blit(coins_text, (15, 42))
+    screen.blit(wave_text, (15, 69))
 
     # Объявление волны
     if wave_delay > 0:
