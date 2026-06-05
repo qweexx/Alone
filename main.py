@@ -77,12 +77,23 @@ choosing = False
 coins = []
 total_coins = 0
 
+# Магазин
+shop_items = [
+    {"name": "Heal 50 HP", "cost": 30, "effect": "heal", "value": 50},
+    {"name": "+5 Max HP", "cost": 50, "effect": "max_hp", "value": 5},
+    {"name": "+1 Speed", "cost": 40, "effect": "speed", "value": 1},
+    {"name": "+10 Damage", "cost": 60, "effect": "damage", "value": 10},
+    {"name": "Faster Attack", "cost": 45, "effect": "attack_speed", "value": -3},
+]
+shop_selected = 0
+
 # Враги и волны
 enemies = []
 wave = 1
 enemies_in_wave = 10
 enemies_spawned = 0
 enemies_killed_wave = 0
+total_kills = 0
 spawn_timer = 0
 wave_delay = 0
 boss = None
@@ -97,6 +108,83 @@ in_shop = False
 # Шрифт
 font = pygame.font.Font(None, 36)
 big_font = pygame.font.Font(None, 72)
+
+# Язык
+lang = "ru"
+texts = {
+    "ru": {
+        "title": "ОДИН",
+        "start": "ПРОБЕЛ чтобы начать",
+        "shop": "МАГАЗИН",
+        "coins": "Монеты",
+        "continue": "ПРОБЕЛ чтобы продолжить",
+        "choose": "ВЫБЕРИ УЛУЧШЕНИЕ",
+        "wave": "Волна",
+        "boss_in": "До босса",
+        "hp": "HP",
+        "lvl": "УР",
+        "game_over": "ИГРА ОКОНЧЕНА",
+        "restart": "ПРОБЕЛ чтобы начать заново",
+        "up_down_buy": "СТРЕЛКИ - выбор | ENTER - купить | ПРОБЕЛ - выход",
+        "enemies": "Врагов",
+        "lang_hint": "L - язык",
+    },
+    "en": {
+        "title": "ALONE",
+        "start": "Press SPACE to start",
+        "shop": "SHOP",
+        "coins": "Coins",
+        "continue": "Press SPACE to continue",
+        "choose": "CHOOSE UPGRADE",
+        "wave": "Wave",
+        "boss_in": "Boss in",
+        "hp": "HP",
+        "lvl": "LVL",
+        "game_over": "GAME OVER",
+        "restart": "Press SPACE to restart",
+        "up_down_buy": "UP/DOWN - choose | ENTER - buy | SPACE - leave",
+        "enemies": "Enemies",
+        "lang_hint": "L - language",
+    }
+}
+
+def t(key):
+    return texts[lang][key]
+
+# Скины
+skins = [
+    {"name": "Knight", "img": "player.png", "cost": 0, "unlocked": True},
+    {"name": "Mage", "img": "player_mage.png", "cost": 100, "unlocked": False},
+    {"name": "Archer", "img": "player_archer.png", "cost": 200, "unlocked": False},
+    {"name": "Berserk", "img": "player_berserk.png", "cost": 500, "unlocked": False},
+]
+current_skin = 0
+in_skins = False
+skin_selected = 0
+
+def load_skins():
+    try:
+        with open('skins.txt', 'r') as f:
+            data = f.read().strip().split(',')
+            for i, val in enumerate(data):
+                if i < len(skins):
+                    skins[i]['unlocked'] = (val == '1')
+    except:
+        pass
+
+def save_skins():
+    with open('skins.txt', 'w') as f:
+        f.write(','.join(['1' if s['unlocked'] else '0' for s in skins]))
+
+load_skins()
+
+# загрузка картинок скинов
+for s in skins:
+    try:
+        s["image"] = pygame.image.load(f"images/{s['img']}")
+        s["image"] = pygame.transform.scale(s["image"], (30, 30))
+    except:
+        s["image"] = player_img
 
 
 def spawn_enemy():
@@ -177,6 +265,34 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == pygame.KEYDOWN:
+            if in_skins:
+                if event.key == pygame.K_ESCAPE:
+                    in_skins = False
+                if event.key == pygame.K_UP and skin_selected > 0:
+                    skin_selected -= 1
+                if event.key == pygame.K_DOWN and skin_selected < len(skins) - 1:
+                    skin_selected += 1
+                if event.key == pygame.K_RETURN:
+                    s = skins[skin_selected]
+                    if s["unlocked"]:
+                        current_skin = skin_selected
+                    elif total_coins >= s["cost"]:
+                        s["unlocked"] = True
+                        total_coins -= s["cost"]
+                        current_skin = skin_selected
+                        save_skins()
+            if in_shop:
+                if event.key == pygame.K_UP:
+                    shop_selected = (shop_selected - 1) % len(shop_items)
+                if event.key == pygame.K_DOWN:
+                    shop_selected = (shop_selected + 1) % len(shop_items)
+                if event.key == pygame.K_RETURN:
+                    item = shop_items[shop_selected]
+                    if total_coins >= item["cost"]:
+                        total_coins -= item["cost"]
+                        apply_choice(item)
+                if event.key == pygame.K_SPACE:
+                    in_shop = False
             if event.key == pygame.K_SPACE and (in_menu or game_over):
                 # Полный сброс
                 player_x, player_y = WIDTH // 2, HEIGHT // 2
@@ -197,12 +313,14 @@ while True:
                 enemies_in_wave = 10
                 enemies_spawned = 0
                 enemies_killed_wave = 0
+                total_kills = 0
                 spawn_timer = 0
                 wave_delay = 0
                 boss = None
                 boss_spawned = False
                 enemies_to_boss = 100
                 total_coins = 0
+                shop_selected = 0
                 choosing = False
                 in_menu = False
                 game_over = False
@@ -210,6 +328,11 @@ while True:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 sys.exit()
+            if event.key == pygame.K_l and in_menu:
+                lang = "ru" if lang == "en" else "en"
+            if event.key == pygame.K_4 and in_menu:
+                in_skins = True
+                skin_selected = current_skin
             if choosing:
                 if event.key == pygame.K_1 and len(level_up_choices) >= 1:
                     apply_choice(level_up_choices[0])
@@ -224,10 +347,36 @@ while True:
     # Меню
     if in_menu:
         screen.fill(BLACK)
-        title = big_font.render("ALONE", True, WHITE)
-        start = font.render("Press SPACE to start", True, GRAY)
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 30)))
-        screen.blit(start, start.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20)))
+        title = big_font.render(t("title"), True, WHITE)
+        start = font.render(t("start"), True, GRAY)
+        lang_text = font.render(t("lang_hint"), True, GRAY)
+        skins_btn = font.render("[4] SKINS", True, GRAY)
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
+        screen.blit(start, start.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20)))
+        screen.blit(lang_text, lang_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20)))
+        screen.blit(skins_btn, skins_btn.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 60)))
+        pygame.display.flip()
+        clock.tick(60)
+        continue
+
+    # Экран скинов
+    if in_skins:
+        screen.fill(BLACK)
+        skin_title = font.render("SKINS", True, YELLOW)
+        screen.blit(skin_title, skin_title.get_rect(center=(WIDTH // 2, 60)))
+
+        for i, s in enumerate(skins):
+            color = WHITE if i == skin_selected else GRAY
+            if not s["unlocked"]:
+                txt = f"{s['name']} - {s['cost']} coins"
+            else:
+                txt = f"{s['name']} - OWNED"
+            line = font.render(txt, True, color)
+            screen.blit(line, line.get_rect(center=(WIDTH // 2, 120 + i * 50)))
+
+        hint = font.render("UP/DOWN - choose | ENTER - select/buy | ESC - back", True, GRAY)
+        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT - 50)))
+
         pygame.display.flip()
         clock.tick(60)
         continue
@@ -235,12 +384,21 @@ while True:
     # Магаз
     if in_shop:
         screen.fill(BLACK)
-        shop_title = big_font.render("SHOP", True, YELLOW)
-        coins_text = font.render(f"Coins: {total_coins}", True, WHITE)
-        continue_text = font.render("Press SPACE to continue", True, GRAY)
-        screen.blit(shop_title, shop_title.get_rect(center=(WIDTH // 2, 200)))
-        screen.blit(coins_text, coins_text.get_rect(center=(WIDTH // 2, 300)))
-        screen.blit(continue_text, continue_text.get_rect(center=(WIDTH // 2, 400)))
+        shop_title = big_font.render(t("shop"), True, YELLOW)
+        coins_text = font.render(f"{t('coins')}: {total_coins}", True, WHITE)
+        screen.blit(shop_title, shop_title.get_rect(center=(WIDTH // 2, 100)))
+        screen.blit(coins_text, coins_text.get_rect(center=(WIDTH // 2, 150)))
+
+        for i, item in enumerate(shop_items):
+            color = WHITE if i == shop_selected else GRAY
+            if total_coins < item["cost"]:
+                color = RED
+            item_text = font.render(f"{item['name']} - {item['cost']} {t('coins').lower()}", True, color)
+            screen.blit(item_text, item_text.get_rect(center=(WIDTH // 2, 220 + i * 50)))
+
+        hint = font.render(t("up_down_buy"), True, GRAY)
+        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT - 50)))
+
         pygame.display.flip()
         clock.tick(60)
         continue
@@ -354,9 +512,10 @@ while True:
                             enemies.remove(e)
                             xp += 10
                             enemies_killed_wave += 1
+                            total_kills += 1
                             if random.random() < 0.5:
                                 coins.append([e[0], e[1]])
-                            if enemies_killed_wave >= enemies_to_boss and not boss_spawned:
+                            if total_kills >= enemies_to_boss and not boss_spawned:
                                 spawn_boss()
                     break
 
@@ -370,7 +529,7 @@ while True:
                     if boss[2] <= 0:
                         boss = None
                         boss_spawned = False
-                        enemies_killed_wave = 0
+                        total_kills = 0
                         xp += 200
                         for _ in range(10):
                             coins.append([random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100)])
@@ -447,8 +606,9 @@ while True:
         pygame.draw.circle(screen, PURPLE, (int(b[0]), int(b[1])), 5)
 
     if not game_over:
-        if player_img:
-            screen.blit(player_img, (player_x - 15, player_y - 15))
+        skin_img = skins[current_skin].get("image", player_img)
+        if skin_img:
+            screen.blit(skin_img, (player_x - 15, player_y - 15))
         else:
             pygame.draw.circle(screen, BLUE, (int(player_x), int(player_y)), player_radius)
             pygame.draw.circle(screen, WHITE, (int(player_x), int(player_y)), player_radius, 2)
@@ -459,10 +619,10 @@ while True:
         pygame.draw.rect(screen, WHITE, (bx, by, bar_w, bar_h), 1)
 
     # Интерфейс
-    hp_text = font.render(f"HP: {int(player_hp)}/{player_max_hp}", True, WHITE)
-    lvl_text = font.render(f"LVL: {level} | XP: {xp}/{xp_to_level}", True, WHITE)
-    coins_text = font.render(f"Coins: {total_coins}", True, YELLOW)
-    wave_text = font.render(f"Wave: {wave} | Enemies: {len(enemies)}/{enemies_in_wave}", True, ORANGE)
+    hp_text = font.render(f"{t('hp')}: {int(player_hp)}/{player_max_hp}", True, WHITE)
+    lvl_text = font.render(f"{t('lvl')}: {level} | XP: {xp}/{xp_to_level}", True, WHITE)
+    coins_text = font.render(f"{t('coins')}: {total_coins}", True, YELLOW)
+    wave_text = font.render(f"{t('wave')}: {wave} | {t('boss_in')}: {enemies_to_boss - total_kills}", True, ORANGE)
     screen.blit(hp_text, (10, 10))
     screen.blit(lvl_text, (10, 40))
     screen.blit(coins_text, (10, 70))
@@ -470,7 +630,7 @@ while True:
 
     # Объявление волны
     if wave_delay > 0:
-        wave_announce = big_font.render(f"WAVE {wave}", True, YELLOW)
+        wave_announce = big_font.render(f"{t('wave')} {wave}", True, YELLOW)
         screen.blit(wave_announce, wave_announce.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
 
     if choosing:
@@ -478,15 +638,15 @@ while True:
         dark.set_alpha(180)
         dark.fill(BLACK)
         screen.blit(dark, (0, 0))
-        choice_text = big_font.render("CHOOSE UPGRADE", True, YELLOW)
+        choice_text = big_font.render(t("choose"), True, YELLOW)
         screen.blit(choice_text, choice_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80)))
         for i, c in enumerate(level_up_choices):
             txt = font.render(f"[{i + 1}] {c['name']}", True, WHITE)
             screen.blit(txt, txt.get_rect(center=(WIDTH // 2, HEIGHT // 2 + i * 40)))
 
     if game_over:
-        over_text = big_font.render("GAME OVER", True, RED)
-        restart = font.render("Press SPACE to restart", True, GRAY)
+        over_text = big_font.render(t("game_over"), True, RED)
+        restart = font.render(t("restart"), True, GRAY)
         screen.blit(over_text, over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20)))
         screen.blit(restart, restart.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20)))
 
