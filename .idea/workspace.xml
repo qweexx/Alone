@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a6d8a052-97dd-4953-92e9-01955d9d5b34" name="Changes" comment="добавлены оружеия и навок">
+    <list default="true" id="a6d8a052-97dd-4953-92e9-01955d9d5b34" name="Changes" comment="добавлено в целом за разработку: &#10;Смена лок на рандом&#10;сундки(а так же их баланс)&#10;зелья(баланс тоже сделан)&#10;враги сильнее с влонами&#10;оружие ближ боя и дальнего&#10;разные модели снарядом&#10;увеличил карту и сделал камеру&#10;авто атака или мышкой&#10;разные боссы&#10;фон лобби&#10;воскрес друга&#10;сохранения прогресса&#10;уровень профиля с наградми&#10;питомцы">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/save.json" beforeDir="false" afterPath="$PROJECT_DIR$/save.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/skins.txt" beforeDir="false" afterPath="$PROJECT_DIR$/skins.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +59,7 @@
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;Python.create_coin.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_decor.executor&quot;: &quot;Run&quot;,
     &quot;Python.create_floor.executor&quot;: &quot;Run&quot;,
     &quot;Python.create_menu_bg.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
@@ -121,7 +124,15 @@
       <option name="project" value="LOCAL" />
       <updated>1780773701083</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="добавлено в целом за разработку: &#10;Смена лок на рандом&#10;сундки(а так же их баланс)&#10;зелья(баланс тоже сделан)&#10;враги сильнее с влонами&#10;оружие ближ боя и дальнего&#10;разные модели снарядом&#10;увеличил карту и сделал камеру&#10;авто атака или мышкой&#10;разные боссы&#10;фон лобби&#10;воскрес друга&#10;сохранения прогресса&#10;уровень профиля с наградми&#10;питомцы">
+      <option name="closed" value="true" />
+      <created>1780825431415</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1780825431415</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -142,6 +153,7 @@
     <MESSAGE value="добавлен задний фон в мен, шрифт, два языка" />
     <MESSAGE value="увеличина карта добавлена пауза" />
     <MESSAGE value="добавлены оружеия и навок" />
-    <option name="LAST_COMMIT_MESSAGE" value="добавлены оружеия и навок" />
+    <MESSAGE value="добавлено в целом за разработку: &#10;Смена лок на рандом&#10;сундки(а так же их баланс)&#10;зелья(баланс тоже сделан)&#10;враги сильнее с влонами&#10;оружие ближ боя и дальнего&#10;разные модели снарядом&#10;увеличил карту и сделал камеру&#10;авто атака или мышкой&#10;разные боссы&#10;фон лобби&#10;воскрес друга&#10;сохранения прогресса&#10;уровень профиля с наградми&#10;питомцы" />
+    <option name="LAST_COMMIT_MESSAGE" value="добавлено в целом за разработку: &#10;Смена лок на рандом&#10;сундки(а так же их баланс)&#10;зелья(баланс тоже сделан)&#10;враги сильнее с влонами&#10;оружие ближ боя и дальнего&#10;разные модели снарядом&#10;увеличил карту и сделал камеру&#10;авто атака или мышкой&#10;разные боссы&#10;фон лобби&#10;воскрес друга&#10;сохранения прогресса&#10;уровень профиля с наградми&#10;питомцы" />
   </component>
 </project>
